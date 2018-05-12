@@ -1,0 +1,172 @@
+package io.seanbailey.sql;
+
+import io.seanbailey.sql.SQLChain.Finisher;
+import io.seanbailey.sql.util.Order;
+import io.seanbailey.sql.util.SQLUtil;
+import io.seanbailey.sql.util.Where;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+
+/**
+ * Generates SQL based off of an SQL chain.
+ *
+ * @author Sean Bailey
+ * @see SQLChain
+ * @since 2018-05-12
+ */
+public class SQLQueryGenerator {
+
+  private SQLChain chain;
+  private Finisher finisher;
+  private List<Object> preparedObjects = new ArrayList<>();
+  private String sql;
+
+
+  /**
+   * Constructs a new SQL Query Generator.
+   *
+   * @param chain SQL Chain to generate query from.
+   * @param finisher The operation that finished this chain.
+   */
+  public SQLQueryGenerator(SQLChain chain, Finisher finisher) {
+    this.chain = chain;
+    this.finisher = finisher;
+    generate();
+  }
+
+
+  /**
+   * Generates SQL.
+   */
+  private void generate() {
+
+    // init
+    StringJoiner joiner = new StringJoiner(" ");
+    joiner.add(generateQueryStart());
+
+    // Iterate over wheres
+    List<Where> wheres = chain.getWheres();
+    boolean first = true;
+    for (Where where : wheres) {
+
+      // Add predicate
+      if (first) {
+        joiner.add("WHERE");
+      } else {
+        joiner.add(where.getType().toString());
+      }
+
+      joiner.add(where.getCondition());
+      preparedObjects.add(where.getObject());
+      first = false;
+
+    }
+
+    // Handle orders
+    if (!chain.getOrders().isEmpty()) {
+      joiner.add(generateOrders());
+    }
+
+    // Limit
+    if (chain.getLimit() != null) {
+      joiner.add("LIMIT " + chain.getLimit());
+    }
+
+    // Offset
+    if (chain.getPage() != null || chain.getOffset() != null) {
+      joiner.add(generateOffset());
+    }
+
+    sql = joiner.toString() + ";";
+
+  }
+
+
+  /**
+   * Generates the start of a query, including the table name.
+   *
+   * @return The start of an SQL query.
+   */
+  private String generateQueryStart() {
+
+    StringJoiner joiner = new StringJoiner(" ");
+
+    // Determine what to select based on finisher
+    switch (finisher) {
+      case COUNT:
+      case EXISTS:
+        joiner.add("SELECT COUNT(*) FROM");
+        break;
+      case EXECUTE:
+      default:
+        joiner.add("SELECT * FROM");
+    }
+
+    // Add table name
+    joiner.add(SQLUtil.getTableName(chain.getClazz()));
+
+    return joiner.toString();
+
+  }
+
+
+  /**
+   * Generates SQL that is used for ordering results.
+   *
+   * @return An SQL String containing an order by statement.
+   */
+  private String generateOrders() {
+
+    StringJoiner joiner = new StringJoiner(" ");
+    Map<String, Order> orders = chain.getOrders();
+
+    joiner.add("ORDER BY");
+
+    // Iterate over hashmap
+    for (String attribute : orders.keySet()) {
+      joiner.add(attribute);
+      joiner.add(orders.get(attribute).toSQL() + ",");
+    }
+
+    // Remove final character (will always be a trailing comma).
+    String out = joiner.toString();
+    return out.substring(0, out.length() - 1);
+
+  }
+
+
+  /**
+   * Generates the SQL responsible for offsetting the result set by n rows.
+   *
+   * @return SQL that will offset the result set.
+   */
+  private String generateOffset() {
+
+    int offset = 0;
+
+    // Handle offset via page
+    if (chain.getPage() != null && chain.getLimit() != null) {
+      offset = chain.getPage() * chain.getLimit();
+    }
+
+    // Handle offset via offset
+    if (chain.getOffset() != null) {
+      offset = chain.getOffset();
+    }
+
+    return "OFFSET " + offset;
+
+  }
+
+
+  public List<Object> getPreparedObjects() {
+    return preparedObjects;
+  }
+
+  public String getSQL() {
+    return sql;
+  }
+
+}
