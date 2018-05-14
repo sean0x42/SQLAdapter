@@ -63,7 +63,7 @@ public class SQLChain {
       condition += " = ?";
     }
 
-    wheres.add(new WhereOperation(condition, object));
+    wheres.add(new WhereOperation(condition, object, Type.AND));
     return this;
   }
 
@@ -77,6 +77,12 @@ public class SQLChain {
    * @since 2018-05-14
    */
   public SQLChain or(String condition, Object object) {
+
+    // Add question mark if necessary
+    if (!condition.contains("?")) {
+      condition += " = ?";
+    }
+    
     wheres.add(new WhereOperation(condition, object, Type.OR));
     return this;
   }
