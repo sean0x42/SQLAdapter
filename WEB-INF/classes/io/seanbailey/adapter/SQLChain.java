@@ -1,10 +1,9 @@
 package io.seanbailey.adapter;
 
-import io.seanbailey.adapter.exception.SQLMappingException;
+import io.seanbailey.adapter.exception.SQLAdapterException;
 import io.seanbailey.adapter.util.Order;
-import io.seanbailey.adapter.util.Where;
-import io.seanbailey.adapter.util.Where.Type;
-import io.seanbailey.model.Model;
+import io.seanbailey.adapter.util.WhereOperation;
+import io.seanbailey.adapter.util.WhereOperation.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -20,12 +19,12 @@ import java.util.Map;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SQLChain {
 
-  private Class<?> clazz;
+  private Class<? extends Model> clazz;
   private Integer limit = null;
   private Integer offset = null;
   private Integer page = null;
   private Map<String, Order> orders = new LinkedHashMap<>();
-  private List<Where> wheres = new ArrayList<>();
+  private List<WhereOperation> wheres = new ArrayList<>();
 
 
   /**
@@ -34,7 +33,7 @@ public class SQLChain {
    * @param clazz Model class.
    * @since 2018-05-14
    */
-  public SQLChain(Class<?> clazz) {
+  public SQLChain(Class<? extends Model> clazz) {
     this.clazz = clazz;
   }
 
@@ -44,7 +43,7 @@ public class SQLChain {
    * an alias of COUNT.
    * @since 2018-05-12
    */
-  enum Finisher {
+  public enum Finisher {
     COUNT, EXISTS, EXECUTE
   }
 
@@ -58,7 +57,13 @@ public class SQLChain {
    * @since 2018-05-14
    */
   public SQLChain where(String condition, Object object) {
-    wheres.add(new Where(condition, object));
+
+    // Add question mark if necessary
+    if (!condition.contains("?")) {
+      condition += " = ?";
+    }
+
+    wheres.add(new WhereOperation(condition, object));
     return this;
   }
 
@@ -72,7 +77,7 @@ public class SQLChain {
    * @since 2018-05-14
    */
   public SQLChain or(String condition, Object object) {
-    wheres.add(new Where(condition, object, Type.OR));
+    wheres.add(new WhereOperation(condition, object, Type.OR));
     return this;
   }
 
@@ -186,11 +191,11 @@ public class SQLChain {
    * @return The number of models.
    * @throws SQLException if the generated SQL is malformed, or some other SQL related exception is
    * encountered.
-   * @throws SQLMappingException if the generated SQL cannot be mapped to Java for some reason.
+   * @throws SQLAdapterException if the generated SQL cannot be mapped to Java for some reason.
    * @since 2018-05-14
    */
-  public int count() throws SQLException, SQLMappingException {
-    return Adapter.getCount(this);
+  public int count() throws SQLException, SQLAdapterException {
+    return QueryExecutor.getCount(this);
   }
 
 
@@ -201,12 +206,12 @@ public class SQLChain {
    * chain was found.
    * @throws SQLException if the generated SQL is malformed, or some other SQL related exception is
    * encountered.
-   * @throws SQLMappingException if the generated SQL cannot be mapped to Java for some reason.
+   * @throws SQLAdapterException if the generated SQL cannot be mapped to Java for some reason.
    * @since 2018-05-14
    */
-  public boolean exists() throws SQLException, SQLMappingException {
+  public boolean exists() throws SQLException, SQLAdapterException {
     limit(1);
-    return Adapter.exists(this);
+    return QueryExecutor.exists(this);
   }
 
 
@@ -215,35 +220,35 @@ public class SQLChain {
    *
    * @return An array of models that match the conditions outlined by the SQL chain.
    * @throws SQLException if the generated SQL is malformed or some other error occurs.
-   * @throws SQLMappingException if the resultant SQL cannot be mapped to Java models.
+   * @throws SQLAdapterException if the resultant SQL cannot be mapped to Java models.
    * @since 2018-05-14
    */
-  public List<Object> execute() throws SQLException, SQLMappingException {
-    return Adapter.execute(this);
+  public List<Model> execute() throws SQLException, SQLAdapterException {
+    return QueryExecutor.execute(this);
   }
 
 
-  Class<?> getClazz() {
+  public Class<? extends Model> getClazz() {
     return clazz;
   }
 
-  Integer getLimit() {
+  public Integer getLimit() {
     return limit;
   }
 
-  Integer getOffset() {
+  public Integer getOffset() {
     return offset;
   }
 
-  Integer getPage() {
+  public Integer getPage() {
     return page;
   }
 
-  Map<String, Order> getOrders() {
+  public Map<String, Order> getOrders() {
     return orders;
   }
 
-  List<Where> getWheres() {
+  public List<WhereOperation> getWheres() {
     return wheres;
   }
 

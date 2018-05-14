@@ -1,6 +1,6 @@
 package io.seanbailey.adapter.util;
 
-public class Where {
+public class WhereOperation {
 
   private String condition;
   private Object object;
@@ -17,7 +17,7 @@ public class Where {
    *  @param condition Condition that must be met.
    * @param object Object to insert at question mark in condition.
    */
-  public Where(String condition, Object object) {
+  public WhereOperation(String condition, Object object) {
     this(condition, object, Type.AND);
   }
 
@@ -29,7 +29,7 @@ public class Where {
    * @param object Object to insert at question mark in condition.
    * @param type Type of Where operation.
    */
-  public Where(String condition, Object object, Type type) {
+  public WhereOperation(String condition, Object object, Type type) {
     this.condition = condition;
     this.object = object;
     this.type = type;

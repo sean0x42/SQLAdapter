@@ -37,19 +37,10 @@ public class StringUtil {
    * Turns a column name into a getter.
    *
    * @param column Column name.
-   * @param clazz Column class.
    * @return Name of the corresponding getter function.
    */
-  public static String toGetter(String column, Class clazz) {
-
-    String uppercased = column.substring(0, 1).toUpperCase() + column.substring(1);
-
-    if (clazz.equals(Boolean.class)) {
-      return "is" + uppercased;
-    }
-
-    return "get" + uppercased;
-
+  public static String toGetter(String column) {
+    return "get" + column.substring(0, 1).toUpperCase() + column.substring(1);
   }
 
 
@@ -60,8 +51,7 @@ public class StringUtil {
    * @return Name of the corresponding setter.
    */
   public static String toSetter (String column) {
-    String uppercased = column.substring(0, 1).toUpperCase() + column.substring(1);
-    return "set" + uppercased;
+    return "set" + column.substring(0, 1).toUpperCase() + column.substring(1);
   }
 
 }

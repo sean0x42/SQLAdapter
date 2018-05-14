@@ -1,5 +1,8 @@
-io.seanbailey
+io.seanbailey.adapter
+io.seanbailey.adapter.annotation
+io.seanbailey.adapter.exception
+io.seanbailey.adapter.generator
+io.seanbailey.adapter.util
+io.seanbailey.controller
 io.seanbailey.model
-io.seanbailey.sql
-io.seanbailey.sql.util
 io.seanbailey.util

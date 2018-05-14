@@ -1,11 +1,13 @@
 package io.seanbailey.controller;
 
-import io.seanbailey.adapter.exception.SQLMappingException;
-import io.seanbailey.model.Model;
+import io.seanbailey.adapter.exception.SQLAdapterException;
+import io.seanbailey.adapter.util.Order;
+import io.seanbailey.adapter.Model;
 import io.seanbailey.model.User;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -29,12 +31,31 @@ public class AdapterTestController extends HttpServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
+
     try {
-      List<Object> users = Model.all(User.class).execute();
+
+      // Attempt to save a new user
+      User test = new User(UUID.randomUUID().toString());
+      LOGGER.info("Saved? " + test.save());
+
+      // Get users
+      List<Model> users = Model
+          .find(User.class, "username", "Johanne")
+          .order("id", Order.DESCENDING)
+          .execute();
+
+      // Loop and print
       for (Object object : users) {
-        LOGGER.info(((User) object).getUsername());
+        User johanne = (User) object;
+        LOGGER.info(johanne.getUsername());
+        johanne.setUsername("Alfred Wayne");
+        johanne.update();
       }
-    } catch (SQLException | SQLMappingException e) {
+
+      int i = Model.all(User.class).count();
+      LOGGER.info("Found " + i + " users.");
+
+    } catch (SQLException | SQLAdapterException e) {
       e.printStackTrace();
     }
 

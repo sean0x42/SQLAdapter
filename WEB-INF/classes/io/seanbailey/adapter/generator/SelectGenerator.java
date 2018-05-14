@@ -1,28 +1,27 @@
-package io.seanbailey.adapter;
+package io.seanbailey.adapter.generator;
 
+import io.seanbailey.adapter.SQLChain;
 import io.seanbailey.adapter.SQLChain.Finisher;
 import io.seanbailey.adapter.util.Order;
 import io.seanbailey.adapter.util.SQLUtil;
-import io.seanbailey.adapter.util.Where;
+import io.seanbailey.adapter.util.WhereOperation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- * Generates SQL based off of an SQL chain.
+ * Generates an SQL query based off of an SQL chain.
  *
  * @author Sean Bailey
  * @see SQLChain
  * @since 2018-05-14
  */
 @SuppressWarnings("WeakerAccess")
-public class QueryGenerator {
+public class SelectGenerator extends Generator {
 
   private SQLChain chain;
   private Finisher finisher;
-  private List<Object> preparedObjects = new ArrayList<>();
-  private String sql;
 
 
   /**
@@ -32,7 +31,7 @@ public class QueryGenerator {
    * @param finisher The operation that finished this chain.
    * @since 2018-05-14
    */
-  QueryGenerator(SQLChain chain, Finisher finisher) {
+  public SelectGenerator(SQLChain chain, Finisher finisher) {
     this.chain = chain;
     this.finisher = finisher;
     generate();
@@ -44,16 +43,19 @@ public class QueryGenerator {
    *
    * @since 2018-05-14
    */
-  private void generate() {
+  @Override
+  protected void generate() {
+
+    this.objects = new ArrayList<>();
 
     // init
     StringJoiner joiner = new StringJoiner(" ");
     joiner.add(generateQueryStart());
 
     // Iterate over wheres
-    List<Where> wheres = chain.getWheres();
+    List<WhereOperation> wheres = chain.getWheres();
     boolean first = true;
-    for (Where where : wheres) {
+    for (WhereOperation where : wheres) {
 
       // Add predicate
       if (first) {
@@ -63,7 +65,7 @@ public class QueryGenerator {
       }
 
       joiner.add(where.getCondition());
-      preparedObjects.add(where.getObject());
+      objects.add(where.getObject());
       first = false;
 
     }
@@ -167,13 +169,5 @@ public class QueryGenerator {
 
   }
 
-
-  public List<Object> getPreparedObjects() {
-    return preparedObjects;
-  }
-
-  public String getSQL() {
-    return sql;
-  }
 
 }

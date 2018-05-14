@@ -6,14 +6,14 @@ package io.seanbailey.adapter.exception;
  * @author Sean Bailey
  * @since 2018-05-13
  */
-public class SQLMappingException extends Throwable {
+public class SQLAdapterException extends Throwable {
 
   /**
    * Constructs a new SQL Mapping Exception.
    *
    * @param message Error message.
    */
-  public SQLMappingException(String message) {
+  public SQLAdapterException(String message) {
     super(message);
   }
 

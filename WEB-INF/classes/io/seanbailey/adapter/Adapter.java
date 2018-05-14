@@ -1,167 +1,162 @@
 package io.seanbailey.adapter;
 
-import io.seanbailey.adapter.SQLChain.Finisher;
-import io.seanbailey.adapter.exception.SQLMappingException;
+import io.seanbailey.adapter.annotation.Excluded;
+import io.seanbailey.adapter.annotation.PrimaryKey;
+import io.seanbailey.adapter.exception.SQLAdapterException;
 import io.seanbailey.util.StringUtil;
-import java.lang.invoke.MethodHandles;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
-import java.util.logging.Logger;
-import javax.naming.NamingException;
 
 /**
  * A class for converting Java to SQL and back again.
  *
  * @author Sean Bailey
+ * @see SQLChain
  * @since 2018-05-14
  */
-class Adapter {
-
-  private static Logger LOGGER;
-
-  static {
-    LOGGER = Logger.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
-  }
+public class Adapter {
 
 
   /**
-   * Retrieves a result set and returns a count.
+   * Uses reflection to create a new model. Then populates it's contents with the current result in
+   * the result set.
    *
-   * @param chain SQL Chain to count results of.
-   * @return The number of models matching the conditions of the SQL chain.
-   * @throws SQLException if the generated SQL is malformed, or some other SQL related exception is
-   * encountered.
-   * @throws SQLMappingException if the generated SQL cannot be mapped to Java for some reason.
+   * @param clazz Class to instantiate.
+   * @param attributes An array of all attributes.
+   * @param results A Result Set.
+   * @return A new model. Created with reflection.
    * @since 2018-05-14
    */
-  static int getCount(SQLChain chain) throws SQLException, SQLMappingException {
-
-    // Get results
-    ResultSet results = getResultSet(chain, Finisher.COUNT);
-
-    // Ensure results aren't null
-    if (results == null) {
-      throw new SQLMappingException("Generated ResultSet was null.");
-    }
-
-    if (results.first()) {
-      return results.getInt(1);
-    }
-
-    throw new SQLMappingException("Generated ResultSet was empty.");
-
-  }
-
-
-  /**
-   * Determines whether the given model exists.
-   *
-   * @param chain SQL Chain that defines SQL to be generated.
-   * @return Whether a model that matches the chain's operations exists.
-   * @throws SQLException if the generated SQL is malformed, or some other SQL related exception is
-   * encountered.
-   * @throws SQLMappingException if the generated SQL cannot be mapped to Java for some reason.
-   * @since 2018-05-14
-   */
-  static boolean exists(SQLChain chain) throws SQLException, SQLMappingException {
-
-    // Get results
-    ResultSet results = getResultSet(chain, Finisher.EXISTS);
-
-    // Ensure results aren't null
-    if (results == null) {
-      throw new SQLMappingException("Generated ResultSet was null.");
-    }
-
-    if (results.first()) {
-      return results.getInt(1) == 1;
-    }
-
-    throw new SQLMappingException("Generated ResultSet was empty.");
-
-  }
-
-
-  /**
-   * Retrieves all matching models.
-   *
-   * @param chain SQL Chain that defines which models should be matched.
-   * @return An array of all matching models.
-   * @throws SQLException if the generated SQL is malformed, or some other SQL related exception is
-   * encountered.
-   * @throws SQLMappingException if the generated SQL cannot be mapped to Java for some reason.
-   * @since 2018-05-14
-   */
-  static List<Object> execute(SQLChain chain) throws SQLException, SQLMappingException {
-
-    // Get results
-    ResultSet results = getResultSet(chain, Finisher.EXECUTE);
-    List<String> columns = new ArrayList<>();
-    List<Object> objects = new ArrayList<>();
-    ResultSetMetaData metaData;
-
-    // Ensure results aren't null
-    if (results == null) {
-      throw new SQLMappingException("Generated ResultSet was null.");
-    }
-
-    // Determine columns
-    metaData = results.getMetaData();
-    for (int i = 0; i <= metaData.getColumnCount(); i++) {
-      columns.add(metaData.getColumnName(i));
-    }
-
+  public static Model createModel(Class<? extends Model> clazz, List<String> attributes,
+      ResultSet results) throws SQLException, SQLAdapterException {
 
     try {
 
-      while (results.next()) {
+      // Instantiate
+      Model model = clazz.newInstance();
 
-        // Create new object instance
-        Object object = chain.getClazz().newInstance();
+      // Iterate over attributes
+      for (int i = 0; i < attributes.size(); i++) {
 
-        // Iterate over columns, and use reflection to set values
-        for (int i = 0; i < columns.size(); i++) {
+        // Get attribute name and data
+        String attribute = attributes.get(i);
+        Object data = results.getObject(i + 1);
 
-          // Use reflection to set data
-          String column = columns.get(i);
-          Object data = results.getObject(i + 1);
-
-          // Check if a setter is available
-          try {
-            Method method = chain.getClazz().getMethod(
-                StringUtil.toSetter(column),
-                data.getClass()
-            );
-            method.invoke(object, data);
-            continue;
-          } catch (NoSuchMethodException ignored) {}
-
-          // No setter was found, set by field
-          chain.getClazz().getField(column).set(object, data);
-
-        }
-
-        objects.add(object);
+        setAttribute(model, attribute, data);
 
       }
 
-    } catch (InstantiationException | IllegalAccessException | NoSuchFieldException | InvocationTargetException e) {
+      model.setSaved(true);
+      return model;
 
-      // Handle the numerous possible exceptions
-      throw new SQLMappingException(String.format(
-          "Failed to map from SQL to Java for class %s. Exception: %s",
-          chain.getClazz().getSimpleName(),
+    } catch (InstantiationException | IllegalAccessException e) {
+      e.printStackTrace();
+      throw new SQLAdapterException(String.format(
+          "Could not create model of type %s. Reason: %s",
+          clazz.getSimpleName(),
           e.getMessage()
       ));
+    }
 
+  }
+
+
+  /**
+   * Gets a list of attributes from a result set.
+   *
+   * @param results Result Set.
+   * @return A list of attributes.
+   * @since 2018-05-14
+   */
+  public static List<String> getAttributesFromResults(ResultSet results) throws SQLException {
+
+    // Ensure result set isn't null
+    if (results == null) {
+      return null;
+    }
+
+    // Retrieve metadata
+    ResultSetMetaData meta = results.getMetaData();
+    List<String> attributes = new ArrayList<>();
+
+    // Determine columns
+    for (int i = 0; i < meta.getColumnCount(); i++) {
+      attributes.add(meta.getColumnName(i + 1));
+    }
+
+    return attributes;
+
+  }
+
+
+  /**
+   * Uses reflection to retrieve a list of all attributes from a model. Any field that is annotated
+   * as excluded will be ignored.
+   *
+   * @param clazz Model class to retrieve columns from.
+   * @return A list of all SQL columns.
+   * @see Excluded
+   * @since 2018-05-14
+   */
+  public static List<String> getAttributesFromModel(Class<? extends Model> clazz) {
+
+    // Create list
+    List<String> attributes = new ArrayList<>();
+
+    // Get and iterate over private fields
+    for (Field field : clazz.getDeclaredFields()) {
+      String name = field.getName();
+
+      // Iterate over annotations
+      boolean excluded = false;
+      for (Annotation annotation : field.getDeclaredAnnotations()) {
+
+        // Look for @Excluded annotations
+        if (annotation.annotationType().equals(Excluded.class)) {
+          excluded = true;
+          break;
+        }
+      }
+
+      // Add attribute
+      if (!excluded) {
+        attributes.add(name);
+      }
+
+    }
+
+    return attributes;
+
+  }
+
+
+  /**
+   * Retrieves all attribute values from a model, according to a list of attributes. Useful for
+   * prepared statements.
+   *
+   * @param model Model to retrieve values from.
+   * @param attributes A list of attributes.
+   * @return A list of objects, found at each corresponding field.
+   * @throws SQLAdapterException if the model cannot be mapped to SQL for some reason.
+   * @see #getAttributeFromInstance(T, String)
+   * @since 2018-05-14
+   */
+  public static <T extends Model> List<Object> getAttributesFromInstance(T model,
+      List<String> attributes)
+      throws SQLAdapterException {
+
+    List<Object> objects = new ArrayList<>();
+
+    // Iterate over attributes
+    for (String column : attributes) {
+      objects.add(getAttributeFromInstance(model, column));
     }
 
     return objects;
@@ -170,60 +165,112 @@ class Adapter {
 
 
   /**
-   * Executes an SQL chain and retrieves it's result set.
+   * Uses reflection to retrieve a model's attribute.
    *
-   * @param chain SQL Chain to execute.
-   * @param finisher The chain operation that finished this chain.
-   * @return A result set, generated from the SQL chain.
-   * @throws SQLException if the generated SQL is malformed, or some other SQL related exception is
-   * encountered.
+   * @param model Model to retrieve values from.
+   * @param attribute Attribute to retrieve.
+   * @return Corresponding attribute value.
+   * @throws SQLAdapterException if the model cannot be mapped to SQL for some reason.
+   * @see #getAttributesFromInstance(T, List)
    * @since 2018-05-14
    */
-  private static ResultSet getResultSet(SQLChain chain, Finisher finisher) throws SQLException {
+  @SuppressWarnings("WeakerAccess")
+  public static <T extends Model> Object getAttributeFromInstance(T model, String attribute)
+      throws SQLAdapterException {
 
-    // Create a new query generator
-    QueryGenerator generator = new QueryGenerator(chain, finisher);
-    logQuery(generator);
+    try {
 
-    // Establish connection
-    try (Connection connection = ConnectionManager.getConnection();
-        PreparedStatement statement = connection.prepareStatement(generator.getSQL())) {
-
-      // Iterate over and add prepared objects
-      int preparedIndex = 1;
-      for (Object object : generator.getPreparedObjects()) {
-        statement.setObject(preparedIndex, object);
-        preparedIndex++;
+      // Search for getter first
+      try {
+        Method method = model.getClass().getMethod(StringUtil.toGetter(attribute));
+        return method.invoke(model);
+      } catch (NoSuchMethodException ignored) {
       }
 
-      // Execute and return
-      return statement.executeQuery();
+      // No getter is available, get it directly from declared field
+      Field field = model.getClass().getDeclaredField(attribute);
+      field.setAccessible(true);
+      return field.get(model);
 
-    } catch (NamingException e) {
-      e.printStackTrace();
+    } catch (IllegalAccessException | InvocationTargetException | NoSuchFieldException e) {
+      throw new SQLAdapterException(String.format(
+          "Could not retrieve attribute value from %s. Exception: %s",
+          model.getClass().getSimpleName(),
+          e.getMessage()
+      ));
     }
-
-    return null;
 
   }
 
 
   /**
-   * Logs the generated SQL according to a standard format.
+   * Uses reflection to set a model's attribute.
    *
-   * @param generator SQL generator.
+   * @param model Model to update.
+   * @param attribute Attribute to set.
+   * @param value Value to set.
+   * @throws SQLAdapterException if the model cannot be mapped to SQL for some reason.
    * @since 2018-05-14
    */
-  private static void logQuery(QueryGenerator generator) {
+  @SuppressWarnings("WeakerAccess")
+  public static <T extends Model> void setAttribute(T model, String attribute, Object value)
+      throws SQLAdapterException {
 
-    // Join prepared objects
-    StringJoiner joiner = new StringJoiner(", ");
+    try {
 
-    for (Object object : generator.getPreparedObjects()) {
-      joiner.add(object.toString());
+      // Search for setter first
+      try {
+        Method method = model.getClass().getMethod(
+            StringUtil.toSetter(attribute),
+            value.getClass()
+        );
+        method.invoke(model, value);
+        return;
+      } catch (NoSuchMethodException ignored) {
+      }
+
+      // No setter was found, set by field
+      Field field = model.getClass().getDeclaredField(attribute);
+      field.setAccessible(true);
+      field.set(model, value);
+
+    } catch (IllegalAccessException | InvocationTargetException | NoSuchFieldException e) {
+      throw new SQLAdapterException(String.format(
+          "Could not set attribute for %s. Exception: %s",
+          model.getClass().getSimpleName(),
+          e.getMessage()
+      ));
     }
 
-    LOGGER.info(String.format("%s [%s]", generator.getSQL(), joiner.toString()));
+  }
+
+
+  /**
+   * Returns the annotated primary key from the given model.
+   *
+   * @param clazz Model to search for primary key in.
+   * @return The name of the primary key attribute.
+   * @since 2018-05-14
+   * @throws SQLAdapterException if the class does not have a primary key.
+   */
+  public static String getPrimaryKey(Class<? extends Model> clazz) throws SQLAdapterException {
+
+    // Get all declared fields
+    for (Field field : clazz.getDeclaredFields()) {
+
+      // Iterate over annotations
+      for (Annotation annotation : field.getDeclaredAnnotations()) {
+        if (annotation.annotationType().equals(PrimaryKey.class)) {
+          return field.getName();
+        }
+      }
+
+    }
+
+    throw new SQLAdapterException(String.format(
+        "The model %s does not have a primary key defined.",
+        clazz.getSimpleName()
+    ));
 
   }
 
