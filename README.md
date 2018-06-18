@@ -1,3 +1,3 @@
-# SQLAdapter
+# SQL Adapter
 
-An adapter for SQL.
+Adapts Java objects into SQL with ease. Built for Tomcat. 
