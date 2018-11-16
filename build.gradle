@@ -1,0 +1,23 @@
+plugins {
+  id 'java'
+  id 'java-library'
+}
+
+dependencies {
+  testImplementation "junit:junit:4.12"
+}
+
+repositories {
+  jcenter()
+}
+
+test {
+  testLogging.showStandardStreams = true
+}
+
+javadoc {
+  options.addBooleanOption('html5', true)
+}
+
+version = "1.0.0"
+group = "io.seanbailey.sqladapter"

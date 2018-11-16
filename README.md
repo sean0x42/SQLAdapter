@@ -4,9 +4,10 @@
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/sean0x42/SQLAdapter.svg)](https://github.com/sean0x42/SQLAdapter)
 [![GitHub issues](https://img.shields.io/github/issues/sean0x42/SQLAdapter.svg)](https://github.com/sean0x42/SQLAdapter/issues/)
 
-A library for adapting Java objects into SQL by
-[Sean Bailey](https://www.seanbailey.io). Inspired by ActiveRecord. This library
-was originally built very quickly for a university assignment.
+A library for adapting Java objects into SQL and back again. Inspired by
+ActiveRecord. This library was originally built very quickly to aid in a university assignment.
+
+Maintained by [Sean Bailey](https://www.seanbailey.io).
 
 
 ## Features
@@ -28,6 +29,12 @@ public class User extends Model {
 }
 ```
 
-### Querying
+Then head over to the [quick start guide](https://github.com/sean0x42/SQLAdapter/wiki/Quick-Start-Guide), or [read the documentation]() (coming soon) to get started.
 
-Where
+## Thanks
+
+This library was battle tested by my university mates:
+
+ * [Adam Crocker](https://github.com/patch7331)
+ * [Jacob Nolan](https://github.com/JacobNolan1)
+ * [Jack Parkes](https://github.com/JackParkes1)
