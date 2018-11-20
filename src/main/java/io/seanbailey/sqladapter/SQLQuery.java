@@ -17,6 +17,17 @@ public class SQLQuery {
     this.clazz = clazz;
   }
 
+  /**
+   * Generate and return the SQL query as a string.
+   * Note that this function should only be used for debug/output purposes.
+   * Please use prepared statements instead.
+   * @return A representation of this query as a string.
+   */
+  @Override
+  public String toString() {
+    return "SELECT *";      
+  }
+
   public Class<? extends Model> getClazz() {
     return clazz;
   }

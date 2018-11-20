@@ -11,10 +11,6 @@ repositories {
   jcenter()
 }
 
-test {
-  testLogging.showStandardStreams = true
-}
-
 javadoc {
   options.addBooleanOption('html5', true)
 }
