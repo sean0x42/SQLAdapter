@@ -3,6 +3,7 @@
 [![GitLicense](https://gitlicense.com/badge/sean0x42/SQLAdapter)](https://gitlicense.com/license/sean0x42/SQLAdapter)
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/sean0x42/SQLAdapter.svg)](https://github.com/sean0x42/SQLAdapter)
 [![GitHub issues](https://img.shields.io/github/issues/sean0x42/SQLAdapter.svg)](https://github.com/sean0x42/SQLAdapter/issues/)
+[![Coverage Status](https://coveralls.io/repos/github/sean0x42/SQLAdapter/badge.svg?branch=master)](https://coveralls.io/github/sean0x42/SQLAdapter?branch=master)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sean0x42)
 
 An ORM for adapting Java objects into SQL and back again. Inspired by
