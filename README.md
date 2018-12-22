@@ -3,9 +3,11 @@
 [![GitLicense](https://gitlicense.com/badge/sean0x42/SQLAdapter)](https://gitlicense.com/license/sean0x42/SQLAdapter)
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/sean0x42/SQLAdapter.svg)](https://github.com/sean0x42/SQLAdapter)
 [![GitHub issues](https://img.shields.io/github/issues/sean0x42/SQLAdapter.svg)](https://github.com/sean0x42/SQLAdapter/issues/)
+[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sean0x42)
 
-A library for adapting Java objects into SQL and back again. Inspired by
-ActiveRecord. This library was originally built very quickly to aid in a university assignment.
+An ORM for adapting Java objects into SQL and back again. Inspired by
+ActiveRecord. This library was originally built very quickly to aid in a
+university assignment.
 
 Maintained by [Sean Bailey](https://www.seanbailey.io).
 
@@ -15,6 +17,7 @@ Maintained by [Sean Bailey](https://www.seanbailey.io).
  * Save, query, or delete models with a single line.
  * Chain SQL functions together for more control over your queries.
  * Automatically infers information such as table names, column names, and more.
+ * Highly configurable.
 
 
 ## Usage

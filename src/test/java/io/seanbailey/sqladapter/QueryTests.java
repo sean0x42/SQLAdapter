@@ -11,11 +11,19 @@ public class QueryTests {
 
   @Test
   public void testAll() {
-    String sql = TestModel.all(TestModel.class).toString();
-    assertEquals(
-        "Failure, all() generated incorrect SQL.", 
-        sql, 
-        "SELECT * FROM test_models;"
-    );
+    String sql = Model.all(TestModel.class).toString();
+    assertEquals(sql, "SELECT * FROM");
+  }
+
+  @Test
+  public void testAllCount() {
+    String sql = Model.all(TestModel.class).count().toString();
+    assertEquals(sql, "SELECT COUNT(*) FROM");
+  }
+
+  @Test
+  public void testAllExists() {
+    String sql = Model.all(TestModel.class).exists().toString();
+    assertEquals(sql, "SELECT COUNT(*) FROM");
   }
 }

@@ -1,4 +1,4 @@
-package io.seanbailey.sqladapter;
+package io.seanbailey.sqladapter.config;
 
 /**
  * An enum representing various possible naming conventions.

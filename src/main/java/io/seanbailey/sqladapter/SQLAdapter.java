@@ -1,5 +1,8 @@
 package io.seanbailey.sqladapter;
 
+import io.seanbailey.sqladapter.config.Convention;
+import io.seanbailey.sqladapter.config.Verbosity;
+
 /**
  * A class for configuring the operation of the SQLAdapter library.
  */

@@ -1,4 +1,4 @@
-package io.seanbailey.sqladapter;
+package io.seanbailey.sqladapter.config;
 
 /**
  * An enum which represents the logging verbosity used by the library.
