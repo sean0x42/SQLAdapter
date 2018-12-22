@@ -1,6 +1,6 @@
 package io.seanbailey.sqladapter;
 
-import io.seanbailey.sqladapter.config.Convention;
+import io.seanbailey.sqladapter.config.Case;
 import io.seanbailey.sqladapter.config.Verbosity;
 
 /**
@@ -9,8 +9,8 @@ import io.seanbailey.sqladapter.config.Verbosity;
 public class SQLAdapter {
 
   private static Verbosity verbosity = Verbosity.SILENT;
-  private static Convention tableNamingConvention = Convention.SNAKE_CASE;
-  private static Convention columnNamingConvention = Convention.SNAKE_CASE;
+  private static Case tableNamingConvention = Case.SNAKE;
+  private static Case columnNamingConvention = Case.SNAKE;
 
   public static Verbosity getVerbosity() {
     return verbosity;
@@ -37,26 +37,26 @@ public class SQLAdapter {
     SQLAdapter.verbosity = verbosity;
   }
 
-  public static Convention getTableNamingConvention() {
+  public static Case getTableNamingConvention() {
     return tableNamingConvention;
   }
 
   /**
-   * Sets the convention used for naming SQL tables.
+   * Sets the case convention used for naming SQL tables.
    *
    * <p>
    * This option configures how the adapter infers table names from the class
    * name of a model.
    * </p>
    *
-   * @see io.seanbailey.sqladapter.Convention
+   * @see io.seanbailey.sqladapter.Case
    * @param convention Table naming convention.
    */
-  public static void setTableNamingConvention(Convention convention) {
+  public static void setTableNamingConvention(Case convention) {
     SQLAdapter.tableNamingConvention = convention;
   }
 
-  public static Convention getColumnNamingConvention() {
+  public static Case getColumnNamingConvention() {
     return columnNamingConvention;
   }
 
@@ -68,10 +68,10 @@ public class SQLAdapter {
    * names of attributes.
    * </p>
    *
-   * @see io.seanbailey.sqladapter.Convention
+   * @see io.seanbailey.sqladapter.Case
    * @param convention Column naming convention.
    */
-  public static void setColumnNamingConvention(Convention convention) {
+  public static void setColumnNamingConvention(Case convention) {
     SQLAdapter.columnNamingConvention = convention;
   }
 }

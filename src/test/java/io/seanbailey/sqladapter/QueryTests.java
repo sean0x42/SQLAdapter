@@ -12,18 +12,69 @@ public class QueryTests {
   @Test
   public void testAll() {
     String sql = Model.all(TestModel.class).toString();
-    assertEquals(sql, "SELECT * FROM");
+    assertEquals(sql, "SELECT * FROM _;");
   }
 
   @Test
   public void testAllCount() {
     String sql = Model.all(TestModel.class).count().toString();
-    assertEquals(sql, "SELECT COUNT(*) FROM");
+    assertEquals(sql, "SELECT COUNT(*) FROM _;");
   }
 
   @Test
   public void testAllExists() {
     String sql = Model.all(TestModel.class).exists().toString();
-    assertEquals(sql, "SELECT COUNT(*) FROM");
+    assertEquals(sql, "SELECT COUNT(*) FROM _;");
+  }
+
+  @Test
+  public void testLimit() {
+    SQLQuery query = Model.all(TestModel.class).limit(5);
+    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5;");
+
+    query = query.limit();
+    assertEquals(query.toString(), "SELECT * FROM _;");
+  }
+
+  @Test
+  public void testOffset() {
+    SQLQuery query = Model.all(TestModel.class).offset(3);
+    assertEquals(query.toString(), "SELECT * FROM _ OFFSET 3;");
+
+    query = query.offset();
+    assertEquals(query.toString(), "SELECT * FROM _;");
+
+    query = query.offset(-5);
+    assertEquals(query.toString(), "SELECT * FROM _;");
+  }
+
+  @Test
+  public void testPer() {
+    SQLQuery query = Model.all(TestModel.class).per(5);
+    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5;");
+
+    query = query.per();
+    assertEquals(query.toString(), "SELECT * FROM _;");
+
+    query = query.per(-5);
+    assertEquals(query.toString(), "SELECT * FROM _;");
+  }
+
+  @Test
+  public void testPageWithoutLimit() {
+    SQLQuery query = Model.all(TestModel.class).page(5);
+    assertEquals(query.toString(), "SELECT * FROM _;");
+  }
+
+  @Test
+  public void testPageWithLimit() {
+    SQLQuery query = Model.all(TestModel.class).per(5).page(1);
+    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5 OFFSET 0;");
+
+    query = query.page(3);
+    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5 OFFSET 10;");
+
+    query = query.page(0);
+    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5 OFFSET 0;");
   }
 }
