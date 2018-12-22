@@ -11,6 +11,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
       TERM: dumb
+      COVERALLS_REPO_TOKEN: wUwAgzVcTYt0uD7Pi6hWNOC0RV3tRbRlm
     steps:
       - checkout
       - restore_cache:
