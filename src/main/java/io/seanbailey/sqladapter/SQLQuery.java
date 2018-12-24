@@ -1,5 +1,6 @@
 package io.seanbailey.sqladapter;
 
+import java.util.LinkedList;
 import java.util.StringJoiner;
 
 /**
@@ -15,6 +16,7 @@ public class SQLQuery {
   private Integer limit = null;
   private Integer offset = null;
   private Integer page = null;
+  private LinkedList<QueryCondition> wheres;
 
   /**
    * Constructs a new SQL query.
@@ -22,6 +24,60 @@ public class SQLQuery {
    */
   public SQLQuery(Class<? extends Model> clazz) {
     this.clazz = clazz;
+    wheres = new LinkedList<>();
+  }
+
+  /**
+   * Defines a condition that the model must conform to.
+   *
+   * By default, this function assumes you wish perform a simple comparison
+   * between the attribute and object. So calling
+   *
+   * <pre>
+   * {@code Article.where("title", "The quick brown fox");}
+   * </pre>
+   *
+   * Will generate the following SQL
+   *
+   * <pre>
+   * {@code SELECT * FROM articles WHERE title = "The quick brown fox";}
+   * </pre>
+   *
+   * If you need more control over the operator that is used in the where
+   * clause, you can simple write your own operator within the attribute.
+   *
+   * <pre>
+   * {@code Atricle.where("published_at >= ?", new Date(2018, 12, 24));}
+   * </pre>
+   * 
+   * Which would result in the following SQL
+   *
+   * <pre>
+   * {@code SELECT * FROM articles WHERE published_at >= '2018/12/24';}
+   * </pre>
+   *
+   * It's also worth noting that this function assumes that you wish to chain
+   * conditions with the AND operator. If this is not the case, use the
+   * {@link #or(String, Object) or} method instead.
+   *
+   * @param attribute Attribute to find.
+   * @param object Object to compare against.
+   * @return An SQL query for chaining.
+   */
+  public SQLQuery where(String attribute, Object object) {
+    wheres.add(new QueryCondition(attribute, object));   
+    return this;
+  }
+
+  /**
+   * Adds a where condition chained with the OR operator.
+   * @param attribute Attribute to find.
+   * @param object Object to compare against.
+   * @return An SQLQuery for chaining.
+   */
+  public SQLQuery or(String attribute, Object object) {
+    wheres.add(new QueryCondition(attribute, object, QueryCondition.Type.OR));
+    return this;
   }
 
   /**
@@ -141,15 +197,37 @@ public class SQLQuery {
     // Step 2: Add class
     joiner.add("_");//Adapter.inferTableName(clazz));
 
-    // Step 3: Handle offsets and limits
+    // Step 3: Handle where conditions
+    generateWhere(joiner);
+
+    // Step 4: Handle offsets and limits
     generatePaging(joiner);
 
     return joiner.toString() + ";";
   }
 
   /**
+   * Generates the WHERE component of an SQL statement.
+   * @param joiner StringJoiner to append WHERE to.
+   */
+  private void generateWhere(StringJoiner joiner) {
+    // Ensure where conditions have been defined.
+    if (wheres.size() == 0) {
+      return;
+    } 
+
+    joiner.add("WHERE");
+    boolean first = true;
+
+    for (QueryCondition condition : wheres) {
+      joiner.add(condition.toString(!first));
+      first = false;
+    }
+  }
+
+  /**
    * Generates the paging component of an SQL statement.
-   * Determiens what values should be displayed under LIMIT and OFFSET.
+   * Determines what values should be displayed under LIMIT and OFFSET.
    * @param joiner StringJoiner to append LIMIT and OFFSET to.
    */
   private void generatePaging(StringJoiner joiner) {

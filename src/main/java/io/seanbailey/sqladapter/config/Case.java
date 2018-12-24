@@ -37,7 +37,7 @@ public enum Case {
       case KEBAB:
         return toKebabCase(string);
       default:
-        return null;
+        throw new IllegalArgumentException("Unknown case: " + target.toString());
     } 
   }
 
@@ -47,10 +47,8 @@ public enum Case {
    * @return A snake_case string.
    */
   public static String toSnakeCase(String string) {
-    string = Pattern.compile("(.)([A-Z][a-z]+)").matcher(string).replaceAll(match -> {
-      return match.group(0) + "_" + match.group(1);
-    });
-    string = string.replaceAll(" -", "_");
+    string = string.replaceAll("(.)([A-Z])([a-z])", "$1_$2$3");
+    string = string.replaceAll("[ -]", "_");
     return string.toLowerCase();
   }
 

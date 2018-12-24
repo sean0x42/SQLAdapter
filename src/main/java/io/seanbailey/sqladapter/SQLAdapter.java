@@ -30,7 +30,7 @@ public class SQLAdapter {
    * using <code>Verbosity.SILENT</code>.
    * </p>
    *
-   * @see io.seanbailey.sqladapter.Verbosity
+   * @see io.seanbailey.sqladapter.config.Verbosity
    * @param verbosity Verbosity level.
    */
   public static void setVerbosity(Verbosity verbosity) {
@@ -49,7 +49,7 @@ public class SQLAdapter {
    * name of a model.
    * </p>
    *
-   * @see io.seanbailey.sqladapter.Case
+   * @see io.seanbailey.sqladapter.config.Case
    * @param convention Table naming convention.
    */
   public static void setTableNamingConvention(Case convention) {
@@ -68,7 +68,7 @@ public class SQLAdapter {
    * names of attributes.
    * </p>
    *
-   * @see io.seanbailey.sqladapter.Case
+   * @see io.seanbailey.sqladapter.config.Case
    * @param convention Column naming convention.
    */
   public static void setColumnNamingConvention(Case convention) {

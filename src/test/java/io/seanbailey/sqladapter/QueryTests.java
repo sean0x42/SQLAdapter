@@ -12,69 +12,84 @@ public class QueryTests {
   @Test
   public void testAll() {
     String sql = Model.all(TestModel.class).toString();
-    assertEquals(sql, "SELECT * FROM _;");
+    assertEquals("SELECT * FROM _;", sql);
   }
 
   @Test
   public void testAllCount() {
     String sql = Model.all(TestModel.class).count().toString();
-    assertEquals(sql, "SELECT COUNT(*) FROM _;");
+    assertEquals("SELECT COUNT(*) FROM _;", sql);
   }
 
   @Test
   public void testAllExists() {
     String sql = Model.all(TestModel.class).exists().toString();
-    assertEquals(sql, "SELECT COUNT(*) FROM _;");
+    assertEquals("SELECT COUNT(*) FROM _;", sql);
   }
 
   @Test
   public void testLimit() {
     SQLQuery query = Model.all(TestModel.class).limit(5);
-    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5;");
+    assertEquals("SELECT * FROM _ LIMIT 5;", query.toString());
 
     query = query.limit();
-    assertEquals(query.toString(), "SELECT * FROM _;");
+    assertEquals("SELECT * FROM _;", query.toString());
   }
 
   @Test
   public void testOffset() {
     SQLQuery query = Model.all(TestModel.class).offset(3);
-    assertEquals(query.toString(), "SELECT * FROM _ OFFSET 3;");
+    assertEquals("SELECT * FROM _ OFFSET 3;", query.toString());
 
     query = query.offset();
-    assertEquals(query.toString(), "SELECT * FROM _;");
+    assertEquals("SELECT * FROM _;", query.toString());
 
     query = query.offset(-5);
-    assertEquals(query.toString(), "SELECT * FROM _;");
+    assertEquals("SELECT * FROM _;", query.toString());
   }
 
   @Test
   public void testPer() {
     SQLQuery query = Model.all(TestModel.class).per(5);
-    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5;");
+    assertEquals("SELECT * FROM _ LIMIT 5;", query.toString());
 
     query = query.per();
-    assertEquals(query.toString(), "SELECT * FROM _;");
+    assertEquals("SELECT * FROM _;", query.toString());
 
     query = query.per(-5);
-    assertEquals(query.toString(), "SELECT * FROM _;");
+    assertEquals("SELECT * FROM _;", query.toString());
   }
 
   @Test
   public void testPageWithoutLimit() {
     SQLQuery query = Model.all(TestModel.class).page(5);
-    assertEquals(query.toString(), "SELECT * FROM _;");
+    assertEquals("SELECT * FROM _;", query.toString());
   }
 
   @Test
   public void testPageWithLimit() {
     SQLQuery query = Model.all(TestModel.class).per(5).page(1);
-    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5 OFFSET 0;");
+    assertEquals("SELECT * FROM _ LIMIT 5 OFFSET 0;", query.toString());
 
     query = query.page(3);
-    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5 OFFSET 10;");
+    assertEquals("SELECT * FROM _ LIMIT 5 OFFSET 10;", query.toString());
 
     query = query.page(0);
-    assertEquals(query.toString(), "SELECT * FROM _ LIMIT 5 OFFSET 0;");
+    assertEquals("SELECT * FROM _ LIMIT 5 OFFSET 0;", query.toString());
+  }
+
+  @Test
+  public void testWhere() {
+    SQLQuery query = Model.where(TestModel.class, "title", "test");
+    assertEquals("SELECT * FROM _ WHERE title = \"test\";", query.toString());
+
+    query.where("author", "Sean Bailey");
+    assertEquals("SELECT * FROM _ WHERE title = \"test\" AND author = \"Sean Bailey\";", query.toString());
+  }
+
+  @Test
+  public void testOr() {
+    SQLQuery query = Model.where(TestModel.class, "title", "test").or("author", "Sean Bailey");
+    assertEquals("SELECT * FROM _ WHERE title = \"test\" OR author = \"Sean Bailey\";", query.toString());
   }
 }

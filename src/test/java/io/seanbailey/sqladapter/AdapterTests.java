@@ -19,7 +19,7 @@ public class AdapterTests {
 
     // Step 2: CamelCase
     SQLAdapter.setTableNamingConvention(Case.CAMEL);
-    // assertEquals(Adapter.inferTableName(TestModel.class), "TestModel");
+    assertEquals(Adapter.inferTableName(TestModel.class), "TestModel");
 
     // Step 3: KebabCase
     SQLAdapter.setTableNamingConvention(Case.KEBAB);

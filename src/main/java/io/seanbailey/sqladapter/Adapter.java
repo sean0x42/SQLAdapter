@@ -22,10 +22,16 @@ class Adapter {
    * Infers the table name of a given class.
    * The resulting name will conform to the configured table name case
    * convention.
-   * @param name Name of the class.
+   * @param name Name of the class. Should be formatted as camel case.
    * @return Name of the table.
    */
   public static String inferTableName(String name) {
-    return Case.convertTo(SQLAdapter.getTableNamingConvention(), name);
+    Case caseFormat = SQLAdapter.getTableNamingConvention();
+    switch (caseFormat) {
+      case CAMEL:
+        return name;
+      default:
+        return Case.convertTo(caseFormat, name);
+    }
   }
 }
