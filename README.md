@@ -1,6 +1,7 @@
 # SQL Adapter
 
 [![GitLicense](https://gitlicense.com/badge/sean0x42/SQLAdapter)](https://gitlicense.com/license/sean0x42/SQLAdapter)
+[![Documentation Status](https://readthedocs.org/projects/sqladapter/badge/?version=latest)](https://sqladapter.readthedocs.io/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/sean0x42/SQLAdapter/badge.svg?branch=master)](https://coveralls.io/github/sean0x42/SQLAdapter?branch=master)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sean0x42)
 
