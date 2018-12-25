@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/SQLAdapter.iml" filepath="$PROJECT_DIR$/SQLAdapter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SQLAdapter_main.iml" filepath="$PROJECT_DIR$/.idea/modules/SQLAdapter_main.iml" group="SQLAdapter" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SQLAdapter_test.iml" filepath="$PROJECT_DIR$/.idea/modules/SQLAdapter_test.iml" group="SQLAdapter" />
+    </modules>
+  </component>
+</project>
