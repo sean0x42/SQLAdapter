@@ -14,7 +14,7 @@ class Adapter {
    * @param clazz Class to infer name of.
    * @return Name of the class's table.
    */
-  public static String inferTableName(Class<? extends Model> clazz) {
+  static String inferTableName(Class<? extends Model> clazz) {
     return inferTableName(clazz.getSimpleName());
   }
 
@@ -25,11 +25,11 @@ class Adapter {
    * @param name Name of the class. Should be formatted as camel case.
    * @return Name of the table.
    */
-  public static String inferTableName(String name) {
+  static String inferTableName(String name) {
     Case caseFormat = SQLAdapter.getTableNamingConvention();
     switch (caseFormat) {
       case CAMEL:
-        return name;
+        return name; // Class names are already in CamelCase
       default:
         return Case.convertTo(caseFormat, name);
     }

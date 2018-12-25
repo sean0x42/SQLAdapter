@@ -1,5 +1,6 @@
-package io.seanbailey.sqladapter;
+package io.seanbailey.sqladapter.query;
 
+import io.seanbailey.sqladapter.Model;
 import java.util.LinkedList;
 import java.util.StringJoiner;
 
@@ -8,23 +9,25 @@ import java.util.StringJoiner;
  * Chaining functions together provides lots of control over the resulting SQL,
  * allowing you to generate any query you can imagine.
  */
-public class SQLQuery {
+public class Query {
 
   private final Class<? extends Model> clazz;
 
-  private QueryMode mode = QueryMode.NORMAL;
+  private Mode mode = Mode.NORMAL;
   private Integer limit = null;
   private Integer offset = null;
   private Integer page = null;
-  private LinkedList<QueryCondition> wheres;
+  private LinkedList<WhereCondition> wheres;
+  private LinkedList<OrderClause> orders;
 
   /**
    * Constructs a new SQL query.
    * @param clazz Model class.
    */
-  public SQLQuery(Class<? extends Model> clazz) {
+  public Query(Class<? extends Model> clazz) {
     this.clazz = clazz;
     wheres = new LinkedList<>();
+    orders = new LinkedList<>();
   }
 
   /**
@@ -64,8 +67,8 @@ public class SQLQuery {
    * @param object Object to compare against.
    * @return An SQL query for chaining.
    */
-  public SQLQuery where(String attribute, Object object) {
-    wheres.add(new QueryCondition(attribute, object));   
+  public Query where(String attribute, Object object) {
+    wheres.add(new WhereCondition(attribute, object));
     return this;
   }
 
@@ -73,63 +76,115 @@ public class SQLQuery {
    * Adds a where condition chained with the OR operator.
    * @param attribute Attribute to find.
    * @param object Object to compare against.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery or(String attribute, Object object) {
-    wheres.add(new QueryCondition(attribute, object, QueryCondition.Type.OR));
+  public Query or(String attribute, Object object) {
+    wheres.add(new WhereCondition(attribute, object, WhereCondition.Type.OR));
     return this;
   }
 
   /**
-   * Retrieves the total number of instances saved in the database.
-   * @return An SQLQuery for chaining.
+   * Removes all previously defined orders.
+   * @return An Query for chaining.
    */
-  public SQLQuery count() {
-    mode = QueryMode.COUNT;
+  public Query order() {
+    orders.clear();
+    return this;
+  }
+
+  /**
+   * Order according to the given attribute.
+   * @param attribute Attribute to order by.
+   * @return An Query for chaining.
+   */
+  public Query order(String attribute) {
+    return order(attribute, Order.ASCENDING);
+  }
+
+  /**
+   * Defines how the results should be ordered.
+   * @param attribute Attribute to order by.
+   * @param order How to order results.
+   * @return an Query for chaining.
+   */
+  public Query order(String attribute, Order order) {
+    orders.add(new OrderClause(attribute, order));
+    return this;
+  }
+
+  /**
+   * Clears any defined orders, then adds the given order.
+   * @see #order(String)
+   * @param attribute Attribute to order by.
+   * @return an Query for chaining.
+   */
+  public Query reorder(String attribute) {
+    orders.clear();
+    return order(attribute);
+  }
+
+  /**
+   * Clears any defined orders, then adds the given order.
+   * @see #order(String, Order)
+   * @param attribute Attribute to order by.
+   * @param order How to order results.
+   * @return an Query for chaining.
+   */
+  public Query reorder(String attribute, Order order) {
+    orders.clear();
+    return order(attribute, order);
+  }
+
+  /**
+   * Retrieves the total number of instances saved in the database.
+   * @return An Query for chaining.
+   */
+  public Query count() {
+    mode = Mode.COUNT;
     return this;
   }
 
   /**
    * Determines whether a model matching the given requirements exists.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery exists() {
-    mode = QueryMode.EXISTS;
+  public Query exists() {
+    mode = Mode.EXISTS;
     return this;
   }
 
   /**
    * Reset the record limit.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery limit() {
+  public Query limit() {
     return limit(null);
   }
 
   /**
    * Limits the total number of returned records.
    * @param limit Maximum number of returned records.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery limit(Integer limit) {
+  public Query limit(Integer limit) {
     this.limit = limit;
     return this;
   }
 
   /**
    * Removes any offset.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery offset() {
+  public Query offset() {
     return offset(null);
   }
 
   /**
    * Offsets the returns results.
    * @param offset Number of records to offset by.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery offset(Integer offset) {
+  public Query offset(Integer offset) {
     this.offset = offset;
     page = null; // Reset page so that last function to be called takes priority
     return this;
@@ -137,9 +192,9 @@ public class SQLQuery {
 
   /**
    * Resets the number of records per page.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery per() {
+  public Query per() {
     return per(null);
   }
 
@@ -147,17 +202,17 @@ public class SQLQuery {
    * An alias to limit, which makes semantic sense when paging.
    * @see #limit(Integer)
    * @param per Number of records per page.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery per(Integer per) {
+  public Query per(Integer per) {
     return limit(per); 
   }
 
   /**
    * Resets the current page.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery page() {
+  public Query page() {
     return page(null);
   }
 
@@ -167,9 +222,9 @@ public class SQLQuery {
    * as a limit as been defined.
    * @see #per(Integer)
    * @param page Page to view.
-   * @return An SQLQuery for chaining.
+   * @return An Query for chaining.
    */
-  public SQLQuery page(Integer page) {
+  public Query page(Integer page) {
     this.page = page;
     return this;
   }
@@ -200,9 +255,13 @@ public class SQLQuery {
     // Step 3: Handle where conditions
     generateWhere(joiner);
 
-    // Step 4: Handle offsets and limits
+    // Step 4: Handle ordering
+    generateOrdering(joiner);
+
+    // Step 5: Handle offsets and limits
     generatePaging(joiner);
 
+    // Step 6: Semicolon
     return joiner.toString() + ";";
   }
 
@@ -219,10 +278,34 @@ public class SQLQuery {
     joiner.add("WHERE");
     boolean first = true;
 
-    for (QueryCondition condition : wheres) {
+    for (WhereCondition condition : wheres) {
       joiner.add(condition.toString(!first));
       first = false;
     }
+  }
+
+  /**
+   * Generates the ordering component of an SQL statement.
+   * @param joiner StringJoiner to append ORDER BY clause to.
+   */
+  private void generateOrdering(StringJoiner joiner) {
+    // Ensure order clauses have been defined
+    if (orders.size() == 0) {
+      return;
+    }
+
+    joiner.add("ORDER BY");
+    StringJoiner clauseJoiner = new StringJoiner(", ");
+
+    for (OrderClause clause : orders) {
+      clauseJoiner.add(String.format(
+            "%s %s",
+            clause.getAttribute(),
+            clause.getOrder().getSQL()
+      ));
+    }
+
+    joiner.add(clauseJoiner.toString());
   }
 
   /**
@@ -244,5 +327,36 @@ public class SQLQuery {
     if (offset != null && offset >= 0) {
       joiner.add("OFFSET " + offset);
     }
+  }
+
+  /**
+   * Defines all possible orders that query results can be returned.
+   * @see Query
+   */
+  public enum Order {
+    ASCENDING("ASC"),
+    DESCENDING("DESC");
+
+    private final String sql;
+
+    /**
+     * Constructs a new order enum constant.
+     * @param sql Representation of this constant as an SQL string.
+     */
+    Order(String sql) {
+      this.sql = sql;
+    }
+
+    public String getSQL() {
+      return sql;
+    }
+  }
+
+  /**
+   * An enum which defines the mode of operation for an SQL query.
+   * @see Query
+   */
+  enum Mode {
+    NORMAL, COUNT, EXISTS
   }
 }

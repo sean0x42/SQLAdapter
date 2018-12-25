@@ -1,11 +1,11 @@
-package io.seanbailey.sqladapter;
+package io.seanbailey.sqladapter.query;
 
 import java.util.StringJoiner;
 
 /**
  * Represents a single condition within an SQL query.
  */
-public class QueryCondition {
+class WhereCondition {
 
   /**
    * An enum which defines how this condition should be chained with the
@@ -18,11 +18,11 @@ public class QueryCondition {
   private final Type type;
 
   /**
-   * Constructs a new query condition.
+   * Constructs a new where condition.
    * @param condition Conditional expression.
    * @param object Object to compare against.
    */
-  public QueryCondition(String condition, Object object) {
+  WhereCondition(String condition, Object object) {
     this(condition, object, Type.AND);
   }
 
@@ -32,7 +32,7 @@ public class QueryCondition {
    * @param object Object to compare against.
    * @param type Condition type.
    */
-  public QueryCondition(String condition, Object object, Type type) {
+  WhereCondition(String condition, Object object, Type type) {
     // Add default operator if not already defined
     if (!condition.contains("?")) {
       condition += " = ?";
@@ -48,7 +48,7 @@ public class QueryCondition {
    * @param shouldIncludeType Whether to include the condition type.
    * @return A string representation of this condition.
    */
-  public String toString(boolean shouldIncludeType) {
+  String toString(boolean shouldIncludeType) {
     StringJoiner joiner = new StringJoiner(" ");
 
     // Add type if necessary
@@ -60,15 +60,15 @@ public class QueryCondition {
     return joiner.toString();
   }
 
-  public String getCondition() {
+  String getCondition() {
     return condition;
   }
 
-  public Object getObject() {
+  Object getObject() {
     return object;
   }
 
-  public Type getType() {
+  Type getType() {
     return type;
   }
 }
