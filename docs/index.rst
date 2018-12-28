@@ -22,7 +22,7 @@ Features
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    installation
    quick_start
