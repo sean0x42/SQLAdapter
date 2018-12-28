@@ -5,11 +5,14 @@
 [![Coverage Status](https://coveralls.io/repos/github/sean0x42/SQLAdapter/badge.svg?branch=master)](https://coveralls.io/github/sean0x42/SQLAdapter?branch=master)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sean0x42)
 
-An ORM for adapting Java objects into SQL and back again. Inspired by
-ActiveRecord. This library was originally built very quickly to aid in a
-university assignment.
+**SQL Adapter** is a powerful ORM for adapting Java objects into SQL and back
+again. It is heavily inspired by
+[ActiveModel](https://github.com/rails/rails/tree/master/activemodel) from Ruby
+on Rails, but still maintains its own identity, and feels at home within the
+Java ecosystem.
 
-Maintained by [Sean Bailey](https://www.seanbailey.io).
+The original version of this library was throw together very quickly for a
+university assignment by [Sean Bailey](https://www.seanbailey.io).
 
 
 ## Features
@@ -32,7 +35,9 @@ public class User extends Model {
 }
 ```
 
-Then head over to the [quick start guide](https://github.com/sean0x42/SQLAdapter/wiki/Quick-Start-Guide), or [read the documentation]() (coming soon) to get started.
+Then head over to the [documentation](https://sqladapter.readthedocs.io) to get
+install and get started.
+
 
 ## Thanks
 

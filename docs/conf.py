@@ -20,11 +20,11 @@
 # -- Project information -----------------------------------------------------
 
 project = 'SQL Adapter'
-copyright = '2018, Sean Bailey'
+copyright = '2018, Sean Bailey and SQL Adapter Contributors'
 author = 'Sean Bailey'
 
 # The short X.Y version
-version = ''
+version = '1.0'
 # The full version, including alpha/beta/rc tags
 release = '1.0.0'
 
